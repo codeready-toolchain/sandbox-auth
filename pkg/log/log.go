@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const defaultPackageName = "github.com/synoptic-health/synoptic-services/"
+const defaultPackageName = "github.com/codeready-toolchain/sandbox-auth/"
 
 var (
 	logger = &log.Logger{
@@ -272,7 +272,7 @@ func extractCallerDetails() (file string, line int, pkg string, function string,
 // in tests and as default static initialization of the log. If the ENV variable
 // is not set then the log level is Info.
 func getDefaultLogLevel() log.Level {
-	envVar := os.Getenv("SYNOPTIC_LOG_LEVEL")
+	envVar := os.Getenv("SANDBOX_AUTH_LOG_LEVEL")
 
 	logLevel, err := log.ParseLevel(envVar)
 	if err != nil {
