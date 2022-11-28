@@ -51,19 +51,19 @@ vwIDAQAB
 
 	// Auth Provider defaults
 	defaultOAuthProviderType         = "keycloak"
-	defaultOAuthProviderClientID     = "synoptic-online-platform"
+	defaultOAuthProviderClientID     = "devsandbox-online-platform"
 	defaultOAuthProviderClientSecret = "c7b4487d-3d10-4f23-a163-c32450f3197b"
 
-	defaultOAuthProviderEndpointAuth     = "https://staging-sso.synoptichealth.com/auth/realms/synoptic/protocol/openid-connect/auth"
-	defaultOAuthProviderEndpointToken    = "https://staging-sso.synoptichealth.com/auth/realms/synoptic/protocol/openid-connect/token"
-	defaultOAuthProviderEndpointUserInfo = "https://staging-sso.synoptichealth.com/auth/realms/synoptic/protocol/openid-connect/userinfo"
-	defaultOAuthProviderEndpointLogout   = "https://staging-sso.synoptichealth.com/auth/realms/synoptic/protocol/openid-connect/logout"
+	defaultOAuthProviderEndpointAuth     = "https://sso.devsandbox.dev/auth/realms/sandbox-auth/protocol/openid-connect/auth"
+	defaultOAuthProviderEndpointToken    = "https://sso.devsandbox.dev/auth/realms/sandbox-auth/protocol/openid-connect/token"
+	defaultOAuthProviderEndpointUserInfo = "https://sso.devsandbox.dev/auth/realms/sandbox-auth/protocol/openid-connect/userinfo"
+	defaultOAuthProviderEndpointLogout   = "https://sso.devsandbox.dev/auth/realms/sandbox-auth/protocol/openid-connect/logout"
 	defaultOAuthProviderScopes           = "user:email"
 
 	defaultPublicOAuthClientID = "740650a2-9c44-4db5-b067-a3d1b2cd2d01"
 
 	// DefaultValidRedirectURLs is a regex to be used to whitelist redirect URL for auth
-	// If the SYNOPTIC_REDIRECT_VALID env var is not set then in Dev Mode all redirects allowed - *
+	// If the SANDBOX_AUTH_REDIRECT_VALID env var is not set then in Dev Mode all redirects allowed - *
 	// In prod mode the following regex will be used by default:
 	DefaultValidRedirectURLs = "^(https|http)://(([^/?#]+[.])?localhost)((/|:).*)?$" //"^(https|http)://(([^/?#]+[.])?(?i:openshift[.]io)|localhost)((/|:).*)?$" // *.openshift.io/* and localhost
 	devModeValidRedirectURLs = ".*"
