@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"github.com/gofrs/uuid"
-
 	account "github.com/codeready-toolchain/sandbox-auth/pkg/authentication/account/repository"
+	"github.com/codeready-toolchain/sandbox-auth/pkg/authentication/provider"
+	"github.com/gofrs/uuid"
 )
 
 const (
@@ -48,4 +48,20 @@ type Services interface {
 	AuthenticationProviderService() AuthenticationProviderService
 	LogoutService() LogoutService
 	UserService() UserService
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+//
+// Factories are a special type of service only accessible from other services, that can be replaced during testing,
+// in order to produce mock / dummy factories
+//
+//----------------------------------------------------------------------------------------------------------------------
+
+type IdentityProviderFactory interface {
+	NewIdentityProvider(ctx context.Context, config provider.IdentityProviderConfiguration) provider.IdentityProvider
+}
+
+// Factories is the interface responsible for creating instances of factory objects
+type Factories interface {
+	IdentityProviderFactory() IdentityProviderFactory
 }
