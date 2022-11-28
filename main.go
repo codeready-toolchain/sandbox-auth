@@ -1,1 +1,1 @@
-package sandbox_auth
+package main
