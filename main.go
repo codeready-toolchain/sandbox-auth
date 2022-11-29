@@ -2,14 +2,9 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"net/url"
 	"os"
 	"os/signal"
@@ -48,66 +43,56 @@ func main() {
 		log.Info(context.Background(), nil, "Loading configuration from file [%s]", configFile)
 	}
 
-	config, err := configuration.NewConfigurationData(configFile)
-	if err != nil {
-		log.Panic(nil, map[string]interface{}{
-			"config_file": configFile,
-			"err":         err,
-		}, "failed to setup the configuration")
-	}
-
 	if *printConfig {
 		os.Exit(0)
 	}
 
-	// Initialized developer mode flag and log level for the logger
-	log.InitializeLogger(config.IsLogJSON(), config.GetLogLevel())
-
 	printUserInfo()
 
-	var db *gorm.DB
-	var sqlDB *sql.DB
+	/*
+		var db *gorm.DB
+		var sqlDB *sql.DB
 
-	for {
-		db, err = gorm.Open(postgres.Open(config.GetPostgresConfigString()), &gorm.Config{
-			NowFunc: func() time.Time {
-				return time.Now().Round(time.Microsecond)
-			},
-		})
-		if err != nil {
-			log.Logger().Errorf("ERROR: Unable to open connection to database %v", err)
+		for {
+			db, err := gorm.Open(postgres.Open(config.GetPostgresConfigString()), &gorm.Config{
+				NowFunc: func() time.Time {
+					return time.Now().Round(time.Microsecond)
+				},
+			})
+			if err != nil {
+				log.Logger().Errorf("ERROR: Unable to open connection to database %v", err)
+			}
+			sqlDB, err = db.DB()
+			if err != nil {
+				sqlDB.Close()
+				log.Logger().Errorf("ERROR: Unable to obtain underlying connection to database %v", err)
+				log.Logger().Infof("Retrying to connect in %v...", config.GetPostgresConnectionRetrySleep())
+				time.Sleep(config.GetPostgresConnectionRetrySleep())
+			} else {
+				defer sqlDB.Close()
+				break
+			}
 		}
-		sqlDB, err = db.DB()
-		if err != nil {
-			sqlDB.Close()
-			log.Logger().Errorf("ERROR: Unable to obtain underlying connection to database %v", err)
-			log.Logger().Infof("Retrying to connect in %v...", config.GetPostgresConnectionRetrySleep())
-			time.Sleep(config.GetPostgresConnectionRetrySleep())
-		} else {
-			defer sqlDB.Close()
-			break
+
+		if config.IsPostgresDeveloperModeEnabled() && log.IsDebug() {
+			db = db.Debug()
 		}
-	}
 
-	if config.IsPostgresDeveloperModeEnabled() && log.IsDebug() {
-		db = db.Debug()
-	}
+		if config.GetPostgresConnectionMaxIdle() > 0 {
+			log.Logger().Infof("Configured connection pool max idle %v", config.GetPostgresConnectionMaxIdle())
+			sqlDB.SetMaxIdleConns(config.GetPostgresConnectionMaxIdle())
+		}
+		if config.GetPostgresConnectionMaxOpen() > 0 {
+			log.Logger().Infof("Configured connection pool max open %v", config.GetPostgresConnectionMaxOpen())
+			sqlDB.SetMaxOpenConns(config.GetPostgresConnectionMaxOpen())
+		}
 
-	if config.GetPostgresConnectionMaxIdle() > 0 {
-		log.Logger().Infof("Configured connection pool max idle %v", config.GetPostgresConnectionMaxIdle())
-		sqlDB.SetMaxIdleConns(config.GetPostgresConnectionMaxIdle())
-	}
-	if config.GetPostgresConnectionMaxOpen() > 0 {
-		log.Logger().Infof("Configured connection pool max open %v", config.GetPostgresConnectionMaxOpen())
-		sqlDB.SetMaxOpenConns(config.GetPostgresConnectionMaxOpen())
-	}
-
-	// Set the database transaction timeout
-	transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
-
+		// Set the database transaction timeout
+		transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
+	*/
 	// TODO DB migration here
 
-	log.Logger().Infoln("Dev mode:       ", config.IsPostgresDeveloperModeEnabled())
+	//	log.Logger().Infoln("Dev mode:       ", config.IsPostgresDeveloperModeEnabled())
 	log.Logger().Infoln("GOMAXPROCS:     ", runtime.GOMAXPROCS(-1))
 	log.Logger().Infoln("NumCPU:         ", runtime.NumCPU())
 
