@@ -3,15 +3,12 @@ package main
 import (
 	"context"
 	"github.com/codeready-toolchain/sandbox-auth/goamiddleware"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/authorization/token/manager"
 	"goa.design/goa/v3/middleware"
 	"net/http"
 	"net/url"
 	"os"
 	"sync"
 	"time"
-
-	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 
 	log "github.com/sirupsen/logrus"
 	goahttp "goa.design/goa/v3/http"
@@ -20,11 +17,7 @@ import (
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, cfg *configuration.ConfigurationData, u *url.URL,
-	tokenManager manager.TokenManager,
-	//statusEndpoints *status.Endpoints,
-	//loginEndpoints *login.Endpoints,
-	//userEndpoints *user.Endpoints,
+func handleHTTPServer(ctx context.Context, u *url.URL,
 	wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
@@ -35,14 +28,7 @@ func handleHTTPServer(ctx context.Context, cfg *configuration.ConfigurationData,
 		adapter = goamiddleware.NewLogger(logger)
 	}
 
-	// Provide the transport specific request decoder and response encoder.
-	// The goa http package has built-in support for JSON, XML and gob.
-	// Other encodings can be used by providing the corresponding functions,
-	// see goa.design/implement/encoding.
-	var (
-	//	dec = goahttp.RequestDecoder
-	//	enc = goahttp.ResponseEncoder
-	)
+	// TODO init request/response encoders  here
 
 	// Build the service HTTP request multiplexer and configure it to serve
 	// HTTP requests to the service endpoints.
@@ -57,25 +43,14 @@ func handleHTTPServer(ctx context.Context, cfg *configuration.ConfigurationData,
 	// responses.
 	// Also set middlewares for specific handlers
 	var (
-	//		loginServer     *loginsvr.Server
-	//userServer      *usersvr.Server
+	// TODO init servers here
+
 	)
 	{
-		//eh := errorHandler(logger)
-
-		/*formatter := func(err error) goahttp.Statuser {
-			return goahttp.NewErrorResponse(err)
-		}*/
-
-		//loginServer = loginsvr.New(loginEndpoints, mux, dec, enc, eh, formatter)
-		//loginServer.Use(httpmdlwr.PopulateRequestContext())
-		//loginServer.Use(goamiddleware.PopulateRequestURL())
-
-		//userServer = usersvr.New(userEndpoints, mux, dec, enc, eh, formatter)
+		// TODO init servers here
 	}
-	// Configure the mux.
-	//loginsvr.Mount(mux, loginServer)
-	//usersvr.Mount(mux, userServer)
+
+	// TODO configure the mux
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.
@@ -86,19 +61,14 @@ func handleHTTPServer(ctx context.Context, cfg *configuration.ConfigurationData,
 		}
 		handler = httpmdlwr.Log(adapter)(handler)
 		handler = httpmdlwr.RequestID()(handler)
-		handler = goamiddleware.TokenManagerContext(tokenManager)(handler)
+		// TODO init the token manager context middleware here
 	}
 
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: u.Host, Handler: handler}
-	/*	for _, m := range loginServer.Mounts {
-			logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
-		}
-		for _, m := range userServer.Mounts {
-			logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
-		}
-	*/
+	// TODO log all the mount points here
+
 	(*wg).Add(1)
 	go func() {
 		defer (*wg).Done()

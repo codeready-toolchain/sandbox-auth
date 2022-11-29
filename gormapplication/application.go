@@ -4,16 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	//permissionrepo "github.com/codeready-toolchain/sandbox-auth/pkg/authorization/permission/repository"
-	//tokenrepo "github.com/codeready-toolchain/sandbox-auth/pkg/authorization/token/repository"
-
-	factorymanager "github.com/codeready-toolchain/sandbox-auth/pkg/application/factory/manager"
 	servicecontext "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/factory"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
-	accountrepo "github.com/codeready-toolchain/sandbox-auth/pkg/authentication/account/repository"
-	//providerrepo "github.com/codeready-toolchain/sandbox-auth/pkg/authentication/provider/repository"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -47,13 +40,13 @@ const (
 
 //var y application.Application = &GormTransaction{}
 
-func NewGormDB(db *gorm.DB, config *configuration.ConfigurationData, wrappers factorymanager.FactoryWrappers, options ...factory.Option) *GormDB {
+func NewGormDB(db *gorm.DB, options ...factory.Option) *GormDB {
 	g := new(GormDB)
 	g.db = db.Set("gorm:save_associations", false)
 	g.txIsoLevel = ""
 	g.serviceFactory = factory.NewServiceFactory(func() servicecontext.ServiceContext {
-		return factory.NewServiceContext(g, g, config, wrappers, options...)
-	}, config, options...)
+		return factory.NewServiceContext(g, g, options...)
+	}, options...)
 	return g
 }
 
@@ -84,71 +77,11 @@ func (g *GormBase) newSession() *gorm.DB {
 //
 //----------------------------------------------------------------------------------------------------------------------
 
-func (g *GormBase) IdentityRepository() accountrepo.IdentityRepository {
-	//return accountrepo.NewIdentityRepository(g.newSession())
-	return nil
-}
-
-/*
-	func (g *GormBase) IdentityRoleRepository() rolerepo.IdentityRoleRepository {
-		return rolerepo.NewIdentityRoleRepository(g.newSession())
-	}
-
-	func (g *GormBase) OAuthStateReferenceRepository() providerrepo.OAuthStateReferenceRepository {
-		return providerrepo.NewOAuthStateReferenceRepository(g.newSession())
-	}
-
-	func (g *GormBase) PrivilegeCacheRepository() permissionrepo.PrivilegeCacheRepository {
-		return permissionrepo.NewPrivilegeCacheRepository(g.newSession())
-	}
-
-	func (g *GormBase) TokenRepository() tokenrepo.TokenRepository {
-		return tokenrepo.NewTokenRepository(g.newSession())
-	}
-
-	func (g *GormBase) UserRepository() accountrepo.UserRepository {
-		return accountrepo.NewUserRepository(g.newSession())
-	}
-*/
-func (g *GormBase) UserSessionRepository() accountrepo.UserSessionRepository {
-	//return accountrepo.NewUserSessionRepository(g.newSession())
-	return nil
-}
-
 //----------------------------------------------------------------------------------------------------------------------
 //
 // Services
 //
 //----------------------------------------------------------------------------------------------------------------------
-
-/*
-func (g *GormDB) AuthenticationProviderService() service.AuthenticationProviderService {
-	return g.serviceFactory.AuthenticationProviderService()
-}
-
-func (g *GormDB) LogoutService() service.LogoutService {
-	return g.serviceFactory.LogoutService()
-}
-
-func (g *GormDB) PrivilegeCacheService() service.PrivilegeCacheService {
-	return g.serviceFactory.PrivilegeCacheService()
-}
-
-func (g *GormDB) ResourceService() service.ResourceService {
-	return g.serviceFactory.ResourceService()
-}
-
-func (g *GormDB) RoleManagementService() service.RoleManagementService {
-	return g.serviceFactory.RoleManagementService()
-}
-
-func (g *GormDB) TokenService() service.TokenService {
-	return g.serviceFactory.TokenService()
-}
-
-func (g *GormDB) UserService() service.UserService {
-	return g.serviceFactory.UserService()
-}*/
 
 //----------------------------------------------------------------------------------------------------------------------
 //

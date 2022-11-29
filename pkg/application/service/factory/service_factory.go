@@ -6,8 +6,6 @@ import (
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
 	transaction2 "github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
-	providerservice "github.com/codeready-toolchain/sandbox-auth/pkg/authentication/provider/service"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
 	"github.com/pkg/errors"
 	"time"
@@ -22,8 +20,8 @@ type serviceContextImpl struct {
 	factories                 service.Factories
 }
 
-func NewServiceContext(repos repository2.Repositories, tm transaction2.TransactionManager, config *configuration.ConfigurationData,
-	wrappers factory.FactoryWrappers, options ...Option) context.ServiceContext {
+func NewServiceContext(repos repository2.Repositories, tm transaction2.TransactionManager,
+	options ...Option) context.ServiceContext {
 	ctx := &serviceContextImpl{}
 	ctx.repositories = repos
 	ctx.transactionManager = tm
@@ -31,8 +29,8 @@ func NewServiceContext(repos repository2.Repositories, tm transaction2.Transacti
 
 	var sc context.ServiceContext
 	sc = ctx
-	ctx.factories = factory.NewManager(func() context.ServiceContext { return sc }, config, wrappers)
-	ctx.services = NewServiceFactory(func() context.ServiceContext { return sc }, config, options...)
+	ctx.factories = factory.NewManager(func() context.ServiceContext { return sc })
+	ctx.services = NewServiceFactory(func() context.ServiceContext { return sc }, options...)
 	return sc
 }
 
@@ -118,14 +116,13 @@ func (s *serviceContextImpl) endTransaction() {
 
 type ServiceFactory struct {
 	contextProducer context.ServiceContextProducer
-	config          *configuration.ConfigurationData
 }
 
 // Option an option to configure the Service Factory
 type Option func(f *ServiceFactory)
 
-func NewServiceFactory(producer context.ServiceContextProducer, config *configuration.ConfigurationData, options ...Option) *ServiceFactory {
-	f := &ServiceFactory{contextProducer: producer, config: config}
+func NewServiceFactory(producer context.ServiceContextProducer, options ...Option) *ServiceFactory {
+	f := &ServiceFactory{contextProducer: producer}
 
 	log.Debug(nil, map[string]interface{}{}, "configuring a new service factory with %d options", len(options))
 	// and options
@@ -137,18 +134,4 @@ func NewServiceFactory(producer context.ServiceContextProducer, config *configur
 
 func (f *ServiceFactory) getContext() context.ServiceContext {
 	return f.contextProducer()
-}
-
-func (f *ServiceFactory) AuthenticationProviderService() service.AuthenticationProviderService {
-	return providerservice.NewAuthenticationProviderService(f.getContext(), f.config)
-}
-
-func (f *ServiceFactory) LogoutService() service.LogoutService {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *ServiceFactory) UserService() service.UserService {
-	//TODO implement me
-	panic("implement me")
 }

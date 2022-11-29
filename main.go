@@ -5,10 +5,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/codeready-toolchain/sandbox-auth/gormapplication"
-	factory "github.com/codeready-toolchain/sandbox-auth/pkg/application/factory/manager"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/authorization/token/manager"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
 	"gorm.io/driver/postgres"
@@ -20,7 +17,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -109,48 +105,7 @@ func main() {
 	// Set the database transaction timeout
 	transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
 
-	// Migrate the schema
-	/*err = migration.Migrate(sqlDB, config.GetPostgresDatabase())
-	if err != nil {
-		log.Panic(nil, map[string]interface{}{
-			"err": err,
-		}, "failed migration")
-	}*/
-
-	// Nothing to here except exit, since the migration is already performed.
-	if migrateDB {
-		os.Exit(0)
-	}
-
-	appDB := gormapplication.NewGormDB(db, config, factory.NewDisabledFactoryWrappers())
-
-	tokenManager, err := manager.DefaultManager(appDB, config)
-	if err != nil {
-		log.Panic(nil, map[string]interface{}{
-			"err": err,
-		}, "failed to create token manager")
-	}
-
-	// Initialize the controllers.
-	/*	var (
-			loginSvc     login.Service
-		)
-		{
-			loginSvc = controller.NewLogin(appDB, tokenManager)
-		}
-	*/
-	// Wrap the services in endpoints that can be invoked from other services
-	// potentially running in different processes.
-	/*var (
-		loginEndpoints     *login.Endpoints
-	)
-	{
-		loginEndpoints = login.NewEndpoints(loginSvc)
-	}*/
-
-	/*	log.Logger().Infoln("Git Commit SHA: ", controller.Commit)
-		log.Logger().Infoln("UTC Build Time: ", controller.BuildTime)
-		log.Logger().Infoln("UTC Start Time: ", controller.StartTime)*/
+	// TODO DB migration here
 
 	log.Logger().Infoln("Dev mode:       ", config.IsPostgresDeveloperModeEnabled())
 	log.Logger().Infoln("GOMAXPROCS:     ", runtime.GOMAXPROCS(-1))
@@ -171,16 +126,7 @@ func main() {
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// ##### Start background workers ####
-
-	// Start the token cleanup worker, running every 60 seconds
-	/*tokenCleanupWorker := worker.NewTokenCleanupWorker(context.Background(), appDB)
-	tokenCleanupWorker.Start(time.Second * 60)
-
-	workers := []Worker{tokenCleanupWorker}
-
-	// graceful shutdown
-	go handleShutdown(db, workers...)*/
+	// TODO init background workers here, e.g. token cleanup
 
 	// Start the servers and send errors (if any) to the error channel.
 	switch *hostF {
@@ -204,7 +150,7 @@ func main() {
 			} else if u.Port() == "" {
 				u.Host += ":80"
 			}
-			handleHTTPServer(ctx, config, u, tokenManager,
+			handleHTTPServer(ctx, u,
 				&wg, errc, log.Logger(), *dbgF)
 		}
 
@@ -225,27 +171,6 @@ func main() {
 type Worker interface {
 	Start(freq time.Duration)
 	Stop()
-}
-
-func handleShutdown(db *gorm.DB, workers ...Worker) {
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	<-c
-	// handle ctrl+c event here
-	// close database
-	log.Warn(nil, nil, "Closing DB connection before complete shutdown")
-	sqlDB, _ := db.DB()
-	err := sqlDB.Close()
-	if err != nil {
-		log.Error(nil, map[string]interface{}{
-			"error": err,
-		}, "error while closing the connection to the database")
-	}
-	// also, stop the workers
-	for _, w := range workers {
-		w.Stop()
-	}
-	os.Exit(0)
 }
 
 func configFileFromFlags(flagName string, envVarName string) string {
