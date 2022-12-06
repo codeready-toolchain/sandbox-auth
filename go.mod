@@ -8,6 +8,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
+	github.com/testcontainers/testcontainers-go v0.16.0
 	goa.design/goa/v3 v3.3.1
 	gorm.io/gorm v1.24.1-0.20221019064659-5dd2bb482755
 )
@@ -67,7 +68,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
@@ -101,7 +101,6 @@ require (
 	github.com/serialx/hashring v0.0.0-20190422032157-8b2912629002 // indirect
 	github.com/spf13/cobra v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/testcontainers/testcontainers-go v0.16.0 // indirect
 	github.com/theupdateframework/notary v0.7.0 // indirect
 	github.com/tonistiigi/fsutil v0.0.0-20220930225714-4638ad635be5 // indirect
 	github.com/tonistiigi/units v0.0.0-20180711220420-6950e57a87ea // indirect

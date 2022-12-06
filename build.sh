@@ -1,3 +1,2 @@
 #! /bin/sh
-
-podman build .
+podman build -t sandbox-auth .

@@ -39,7 +39,6 @@ type postgresContainer struct {
 }
 
 func setupPostgres(ctx context.Context, t *testing.T) (*postgresContainer, error) {
-	//networkName := "podman"
 
 	req := testcontainers.ContainerRequest{
 		Name:         "sandbox-auth-postgres",
@@ -76,7 +75,7 @@ func setupPostgres(ctx context.Context, t *testing.T) (*postgresContainer, error
 		return nil, err
 	}
 
-	uri := fmt.Sprintf("http://", ip, mappedPort.Port())
+	uri := fmt.Sprintf("http://%s:%s", ip, mappedPort.Port())
 
 	return &postgresContainer{Container: container, URI: uri}, nil
 }
