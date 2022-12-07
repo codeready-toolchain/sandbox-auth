@@ -182,26 +182,6 @@ func IsBadParameterError(err error) (bool, error) {
 	return true, e
 }
 
-// NewConversionError returns the custom defined error of type NewConversionError.
-func NewConversionError(msg string) ConversionError {
-	return ConversionError{simpleError{msg}}
-}
-
-// IsConversionError returns true if the cause of the given error can be
-// converted to an ConversionError, which is returned as the second result.
-func IsConversionError(err error) (bool, error) {
-	e, ok := errs.Cause(err).(ConversionError)
-	if !ok {
-		return false, nil
-	}
-	return true, e
-}
-
-// ConversionError error means something went wrong converting between different representations
-type ConversionError struct {
-	simpleError
-}
-
 func NewBadRequestError(msg string) BadRequestError {
 	return BadRequestError{simpleError{msg}}
 }

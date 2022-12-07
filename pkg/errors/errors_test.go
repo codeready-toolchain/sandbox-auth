@@ -20,15 +20,6 @@ func TestNewInternalError(t *testing.T) {
 	t.Log(err)
 }
 
-func TestNewConversionError(t *testing.T) {
-	t.Parallel()
-	test.Require(t, test.UnitTest)
-	err := errors.NewConversionError("Couldn't convert workitem")
-
-	// not sure what assertion to do here.
-	t.Log(err)
-}
-
 func TestNewBadParameterError(t *testing.T) {
 	t.Parallel()
 	test.Require(t, test.UnitTest)
