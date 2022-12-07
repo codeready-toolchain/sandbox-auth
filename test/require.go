@@ -15,9 +15,6 @@ const (
 	// Database refers to the name of the environment variable that is used to
 	// specify that test can be run that require a database.
 	Database = "AUTH_RESOURCE_DATABASE"
-	// Remote refers to the name of the environment variable that is used to
-	// specify that test can be run that require availability of some remote servers such as Keycloak.
-	Remote = "AUTH_RESOURCE_REMOTE"
 	// StSkipReasonValueFalse is the skip message for tests when an environment variable is present but evaluates to false.
 	StSkipReasonValueFalse = "Skipping test because environment variable %s evaluates to false: %s"
 	// StSkipReasonNotSet is the skip message for tests when an environment is not present.
