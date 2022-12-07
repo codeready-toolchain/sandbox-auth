@@ -27,10 +27,14 @@ func (lc Lifecycle) Equal(u Equaler) bool {
 	}
 	// DeletedAt can be nil so we need to do a special check here.
 	if lc.DeletedAt.Valid && other.DeletedAt.Valid {
-		return true
+		return lc.DeletedAt.Time.Equal(other.DeletedAt.Time)
 	}
 	if lc.DeletedAt.Valid && !other.DeletedAt.Valid {
 		return lc.DeletedAt.Time.Equal(other.DeletedAt.Time)
+	}
+	// If both DeletedAt values are invalid then they are equal
+	if !lc.DeletedAt.Valid && !other.DeletedAt.Valid {
+		return true
 	}
 	return false
 }

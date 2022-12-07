@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	servicecontext "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/factory"
+	//servicecontext "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
+	//"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/factory"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
 
 	"github.com/pkg/errors"
@@ -39,7 +39,7 @@ const (
 //var x application.Application = &GormDB{}
 
 //var y application.Application = &GormTransaction{}
-
+/*
 func NewGormDB(db *gorm.DB, options ...factory.Option) *GormDB {
 	g := new(GormDB)
 	g.db = db.Set("gorm:save_associations", false)
@@ -48,7 +48,7 @@ func NewGormDB(db *gorm.DB, options ...factory.Option) *GormDB {
 		return factory.NewServiceContext(g, g, options...)
 	}, options...)
 	return g
-}
+}*/
 
 // GormBase is a base struct for gorm implementations of db & transaction
 type GormBase struct {
@@ -63,8 +63,8 @@ type GormTransaction struct {
 // GormDB implements the TransactionManager interface methods for initiating a new transaction
 type GormDB struct {
 	GormBase
-	txIsoLevel     string
-	serviceFactory *factory.ServiceFactory
+	txIsoLevel string
+	//serviceFactory *factory.ServiceFactory
 }
 
 func (g *GormBase) newSession() *gorm.DB {
