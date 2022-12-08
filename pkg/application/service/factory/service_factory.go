@@ -4,10 +4,10 @@ import (
 	"time"
 
 	factory "github.com/codeready-toolchain/sandbox-auth/pkg/application/factory/manager"
-	repositoryPkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/repository"
+	repopkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/repository"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
-	transaction2 "github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
+	transpkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
 
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
 
@@ -15,15 +15,15 @@ import (
 )
 
 type serviceContextImpl struct {
-	repositories              repositoryPkg.Repositories
-	transactionalRepositories repositoryPkg.Repositories
-	transactionManager        transaction2.TransactionManager
+	repositories              repopkg.Repositories
+	transactionalRepositories repopkg.Repositories
+	transactionManager        transpkg.TransactionManager
 	inTransaction             bool
 	services                  service.Services
 	factories                 service.Factories
 }
 
-func NewServiceContext(repos repositoryPkg.Repositories, tm transaction2.TransactionManager,
+func NewServiceContext(repos repopkg.Repositories, tm transpkg.TransactionManager,
 	options ...Option) context.ServiceContext {
 	ctx := &serviceContextImpl{}
 	ctx.repositories = repos
@@ -37,7 +37,7 @@ func NewServiceContext(repos repositoryPkg.Repositories, tm transaction2.Transac
 	return sc
 }
 
-func (s *serviceContextImpl) Repositories() repositoryPkg.Repositories {
+func (s *serviceContextImpl) Repositories() repopkg.Repositories {
 	if s.inTransaction {
 		return s.transactionalRepositories
 	}
@@ -55,7 +55,7 @@ func (s *serviceContextImpl) Services() service.Services {
 func (s *serviceContextImpl) ExecuteInTransaction(todo func() error) error {
 	if !s.inTransaction {
 		// If we are not in a transaction already, start a new transaction
-		var tx transaction2.Transaction
+		var tx transpkg.Transaction
 		var err error
 		if tx, err = s.transactionManager.BeginTransaction(); err != nil {
 			log.Error(nil, map[string]interface{}{
@@ -69,13 +69,13 @@ func (s *serviceContextImpl) ExecuteInTransaction(todo func() error) error {
 		s.inTransaction = true
 
 		// Set the transactional repositories property
-		s.transactionalRepositories = tx.(repositoryPkg.Repositories)
+		s.transactionalRepositories = tx.(repopkg.Repositories)
 
 		defer s.endTransaction()
 
 		return func() error {
 			errorChan := make(chan error, 1)
-			txTimeout := time.After(transaction2.DatabaseTransactionTimeout())
+			txTimeout := time.After(transpkg.DatabaseTransactionTimeout())
 
 			go func() {
 				defer func() {
@@ -138,4 +138,3 @@ func NewServiceFactory(producer context.ServiceContextProducer, options ...Optio
 func (f *ServiceFactory) getContext() context.ServiceContext {
 	return f.contextProducer()
 }
-

@@ -1,17 +1,17 @@
 package factory
 
 import (
-	contextPkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
+	ctxpkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
 )
 
 type Manager struct {
-	contextProducer contextPkg.ServiceContextProducer
+	contextProducer ctxpkg.ServiceContextProducer
 }
 
-func NewManager(producer contextPkg.ServiceContextProducer) *Manager {
+func NewManager(producer ctxpkg.ServiceContextProducer) *Manager {
 	return &Manager{contextProducer: producer}
 }
 
-func (f *Manager) getContext() contextPkg.ServiceContext {
+func (f *Manager) getContext() ctxpkg.ServiceContext {
 	return f.contextProducer()
 }

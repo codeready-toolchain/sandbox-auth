@@ -1,15 +1,15 @@
 package context
 
 import (
-	repositoryPkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/repository"
-	servicePkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/service"
+	repopkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/repository"
+	svcpkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/service"
 )
 
 type ServiceContextProducer func() ServiceContext
 
 type ServiceContext interface {
-	Repositories() repositoryPkg.Repositories
-	Factories() servicePkg.Factories
-	Services() servicePkg.Services
+	Repositories() repopkg.Repositories
+	Factories() svcpkg.Factories
+	Services() svcpkg.Services
 	ExecuteInTransaction(todo func() error) error
 }
