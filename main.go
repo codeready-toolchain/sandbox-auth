@@ -25,9 +25,7 @@ func main() {
 	// --------------------------------------------------------------------
 	// Parse flags
 	// --------------------------------------------------------------------
-	var configFile string
 	var migrateDB bool
-	flag.StringVar(&configFile, "config", "", "Path to the config file to read")
 	flag.BoolVar(&migrateDB, "migrateDatabase", false, "Migrates the database to the newest version and exits.")
 	var (
 		printConfig = flag.Bool("printConfig", false, "Prints the config (including merged environment variables) and exits")
@@ -44,10 +42,6 @@ func main() {
 		log.Panic(nil, map[string]interface{}{
 			"err": err,
 		}, "failed to load configuration")
-	}
-
-	if configFile != "" {
-		log.Info(context.Background(), nil, "Loading configuration from file [%s]", configFile)
 	}
 
 	if *printConfig {
