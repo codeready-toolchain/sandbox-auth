@@ -2,9 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/codeready-toolchain/sandbox-auth/gormapplication"
+	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
+	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"net/url"
 	"os"
 	"os/signal"
@@ -19,9 +25,7 @@ func main() {
 	// --------------------------------------------------------------------
 	// Parse flags
 	// --------------------------------------------------------------------
-	var configFile string
 	var migrateDB bool
-	flag.StringVar(&configFile, "config", "", "Path to the config file to read")
 	flag.BoolVar(&migrateDB, "migrateDatabase", false, "Migrates the database to the newest version and exits.")
 	var (
 		printConfig = flag.Bool("printConfig", false, "Prints the config (including merged environment variables) and exits")
@@ -33,14 +37,11 @@ func main() {
 	)
 	flag.Parse()
 
-	// Override default -config switch with environment variable only if -config switch was
-	// not explicitly given via the command line.
-	if configFile == "" {
-		configFile = configFileFromFlags("config", "SANDBOX_AUTH_CONFIG_FILE_PATH")
-	}
-
-	if configFile != "" {
-		log.Info(context.Background(), nil, "Loading configuration from file [%s]", configFile)
+	config, err := configuration.NewConfiguration()
+	if err != nil {
+		log.Panic(nil, map[string]interface{}{
+			"err": err,
+		}, "failed to load configuration")
 	}
 
 	if *printConfig {
@@ -49,52 +50,49 @@ func main() {
 
 	printUserInfo()
 
-	/*
-		var db *gorm.DB
-		var sqlDB *sql.DB
+	var db *gorm.DB
+	var sqlDB *sql.DB
 
-		for {
-			db, err := gorm.Open(postgres.Open(config.GetPostgresConfigString()), &gorm.Config{
-				NowFunc: func() time.Time {
-					return time.Now().Round(time.Microsecond)
-				},
-			})
-			if err != nil {
-				log.Logger().Errorf("ERROR: Unable to open connection to database %v", err)
-			}
-			sqlDB, err = db.DB()
-			if err != nil {
-				sqlDB.Close()
-				log.Logger().Errorf("ERROR: Unable to obtain underlying connection to database %v", err)
-				log.Logger().Infof("Retrying to connect in %v...", config.GetPostgresConnectionRetrySleep())
-				time.Sleep(config.GetPostgresConnectionRetrySleep())
-			} else {
-				defer sqlDB.Close()
-				break
-			}
+	for {
+		db, err := gorm.Open(postgres.Open(config.GetPostgresConfigString()), &gorm.Config{
+			NowFunc: func() time.Time {
+				return time.Now().Round(time.Microsecond)
+			},
+		})
+		if err != nil {
+			log.Logger().Errorf("ERROR: Unable to open connection to database %v", err)
 		}
+		sqlDB, err = db.DB()
+		if err != nil {
+			sqlDB.Close()
+			log.Logger().Errorf("ERROR: Unable to obtain underlying connection to database %v", err)
+			log.Logger().Infof("Retrying to connect in %v...", config.GetPostgresConnectionRetrySleep())
+			time.Sleep(config.GetPostgresConnectionRetrySleep())
+		} else {
+			defer sqlDB.Close()
+			break
+		}
+	}
 
-		if config.IsPostgresDeveloperModeEnabled() && log.IsDebug() {
-			db = db.Debug()
-		}
+	if config.GetPostgresConnectionMaxIdle() > 0 {
+		log.Logger().Infof("Configured connection pool max idle %v", config.GetPostgresConnectionMaxIdle())
+		sqlDB.SetMaxIdleConns(config.GetPostgresConnectionMaxIdle())
+	}
+	if config.GetPostgresConnectionMaxOpen() > 0 {
+		log.Logger().Infof("Configured connection pool max open %v", config.GetPostgresConnectionMaxOpen())
+		sqlDB.SetMaxOpenConns(config.GetPostgresConnectionMaxOpen())
+	}
 
-		if config.GetPostgresConnectionMaxIdle() > 0 {
-			log.Logger().Infof("Configured connection pool max idle %v", config.GetPostgresConnectionMaxIdle())
-			sqlDB.SetMaxIdleConns(config.GetPostgresConnectionMaxIdle())
-		}
-		if config.GetPostgresConnectionMaxOpen() > 0 {
-			log.Logger().Infof("Configured connection pool max open %v", config.GetPostgresConnectionMaxOpen())
-			sqlDB.SetMaxOpenConns(config.GetPostgresConnectionMaxOpen())
-		}
+	// Set the database transaction timeout
+	transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
 
-		// Set the database transaction timeout
-		transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
-	*/
 	// TODO DB migration here
 
-	//	log.Logger().Infoln("Dev mode:       ", config.IsPostgresDeveloperModeEnabled())
-	log.Logger().Infoln("GOMAXPROCS:     ", runtime.GOMAXPROCS(-1))
-	log.Logger().Infoln("NumCPU:         ", runtime.NumCPU())
+	appDB := gormapplication.NewGormDB(db, config)
+
+	log.Logger().Infoln("Application initialized: ", appDB)
+	log.Logger().Infoln("GOMAXPROCS:              ", runtime.GOMAXPROCS(-1))
+	log.Logger().Infoln("NumCPU:                  ", runtime.NumCPU())
 
 	// Create channel used by both the signal handler and server goroutines
 	// to notify the main goroutine when to stop the server.

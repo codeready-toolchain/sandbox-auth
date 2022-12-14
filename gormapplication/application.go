@@ -2,9 +2,11 @@ package gormapplication
 
 import (
 	"fmt"
+	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/factory"
+	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"strconv"
 
-	//servicecontext "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
+	servicecontext "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
 	//"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/factory"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
 
@@ -36,19 +38,15 @@ const (
 	TXIsoLevelSerializable
 )
 
-//var x application.Application = &GormDB{}
-
-//var y application.Application = &GormTransaction{}
-/*
-func NewGormDB(db *gorm.DB, options ...factory.Option) *GormDB {
+func NewGormDB(db *gorm.DB, config *configuration.Configuration, options ...factory.Option) *GormDB {
 	g := new(GormDB)
 	g.db = db.Set("gorm:save_associations", false)
 	g.txIsoLevel = ""
 	g.serviceFactory = factory.NewServiceFactory(func() servicecontext.ServiceContext {
-		return factory.NewServiceContext(g, g, options...)
-	}, options...)
+		return factory.NewServiceContext(g, g, config, options...)
+	}, config, options...)
 	return g
-}*/
+}
 
 // GormBase is a base struct for gorm implementations of db & transaction
 type GormBase struct {
@@ -63,8 +61,8 @@ type GormTransaction struct {
 // GormDB implements the TransactionManager interface methods for initiating a new transaction
 type GormDB struct {
 	GormBase
-	txIsoLevel string
-	//serviceFactory *factory.ServiceFactory
+	txIsoLevel     string
+	serviceFactory *factory.ServiceFactory
 }
 
 func (g *GormBase) newSession() *gorm.DB {

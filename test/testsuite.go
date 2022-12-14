@@ -9,6 +9,10 @@ import (
 	"testing"
 )
 
+type UnitTestSuite struct {
+	suite.Suite
+}
+
 type DBTestSuite struct {
 	suite.Suite
 	DBUrl      string
