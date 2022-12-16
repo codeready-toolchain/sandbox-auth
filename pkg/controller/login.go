@@ -10,7 +10,7 @@ type loginController struct {
 	app application.Application
 }
 
-// NewLogin returns the login service implementation.
+// NewLoginController returns the login service implementation.
 func NewLoginController(app application.Application) login.Service {
 	return &loginController{
 		app: app,
