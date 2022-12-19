@@ -8,4 +8,3 @@ RUN goa gen github.com/codeready-toolchain/sandbox-auth/design
 RUN go build -v -o sandbox-auth
 RUN ls -l
 RUN cp -r gen/* /gen
-#COPY /app/gen ./gen
