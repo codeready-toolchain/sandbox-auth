@@ -46,7 +46,7 @@ func setupPostgres(ctx context.Context, t *testing.T) (*postgresContainer, error
 
 	req := testcontainers.ContainerRequest{
 		Name:         "sandbox-auth-postgres",
-		Image:        "postgres:14",
+		Image:        "docker.io/postgres:14",
 		ExposedPorts: []string{"5432/tcp"},
 		//Networks:     []string{networkName},
 		AutoRemove: true,
