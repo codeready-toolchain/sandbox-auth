@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.18
+FROM docker.io/golang:1.18
 RUN mkdir /app
 ADD . /app/
 WORKDIR /app
