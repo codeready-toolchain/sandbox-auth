@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	loginsvr "github.com/codeready-toolchain/sandbox-auth/gen/http/login/server"
+	"github.com/codeready-toolchain/sandbox-auth/gen/login"
 	"github.com/codeready-toolchain/sandbox-auth/goamiddleware"
 	"goa.design/goa/v3/middleware"
 	"net/http"
@@ -18,6 +20,7 @@ import (
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
 func handleHTTPServer(ctx context.Context, u *url.URL,
+	loginEndpoints *login.Endpoints,
 	wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
@@ -28,7 +31,14 @@ func handleHTTPServer(ctx context.Context, u *url.URL,
 		adapter = goamiddleware.NewLogger(logger)
 	}
 
-	// TODO init request/response encoders  here
+	// Provide the transport specific request decoder and response encoder.
+	// The goa http package has built-in support for JSON, XML and gob.
+	// Other encodings can be used by providing the corresponding functions,
+	// see goa.design/implement/encoding.
+	var (
+		dec = goahttp.RequestDecoder
+		enc = goahttp.ResponseEncoder
+	)
 
 	// Build the service HTTP request multiplexer and configure it to serve
 	// HTTP requests to the service endpoints.
@@ -43,14 +53,19 @@ func handleHTTPServer(ctx context.Context, u *url.URL,
 	// responses.
 	// Also set middlewares for specific handlers
 	var (
-	// TODO init servers here
-
+		loginServer *loginsvr.Server
 	)
 	{
-		// TODO init servers here
+		eh := errorHandler(logger)
+		formatter := func(ctx context.Context, err error) goahttp.Statuser {
+			return goahttp.NewErrorResponse(ctx, err)
+		}
+
+		loginServer = loginsvr.New(loginEndpoints, mux, dec, enc, eh, formatter)
 	}
 
-	// TODO configure the mux
+	// Configure the mux
+	loginsvr.Mount(mux, loginServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.
@@ -67,7 +82,9 @@ func handleHTTPServer(ctx context.Context, u *url.URL,
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: u.Host, Handler: handler}
-	// TODO log all the mount points here
+	for _, m := range loginServer.Mounts {
+		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
+	}
 
 	(*wg).Add(1)
 	go func() {

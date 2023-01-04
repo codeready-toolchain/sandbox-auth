@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/codeready-toolchain/sandbox-auth/gen/login"
 	"github.com/codeready-toolchain/sandbox-auth/gormapplication"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
+	"github.com/codeready-toolchain/sandbox-auth/pkg/controller"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -90,6 +92,23 @@ func main() {
 
 	appDB := gormapplication.NewGormDB(db, config)
 
+	// Initialize the controllers
+	var (
+		loginSvc login.Service
+	)
+	{
+		loginSvc = controller.NewLoginController(appDB)
+	}
+
+	// Wrap the services in endpoints that can be invoked from other services
+	// potentially running in different processes.
+	var (
+		loginEndpoints *login.Endpoints
+	)
+	{
+		loginEndpoints = login.NewEndpoints(loginSvc)
+	}
+
 	log.Logger().Infoln("Application initialized: ", appDB)
 	log.Logger().Infoln("GOMAXPROCS:              ", runtime.GOMAXPROCS(-1))
 	log.Logger().Infoln("NumCPU:                  ", runtime.NumCPU())
@@ -134,6 +153,7 @@ func main() {
 				u.Host += ":80"
 			}
 			handleHTTPServer(ctx, u,
+				loginEndpoints,
 				&wg, errc, log.Logger(), *dbgF)
 		}
 
