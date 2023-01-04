@@ -3,6 +3,7 @@ package gormapplication
 import (
 	"fmt"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/factory"
+	authrepo "github.com/codeready-toolchain/sandbox-auth/pkg/authentication/repository"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"strconv"
 
@@ -74,6 +75,10 @@ func (g *GormBase) newSession() *gorm.DB {
 // Repositories
 //
 //----------------------------------------------------------------------------------------------------------------------
+
+func (g *GormBase) IdentityRepository() authrepo.IdentityRepository {
+	return authrepo.NewIdentityRepository(g.newSession())
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 //
