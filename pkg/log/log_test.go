@@ -4,20 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/codeready-toolchain/sandbox-auth/test"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"testing"
 )
-
-type TestLoggingSuite struct {
-	test.DBTestSuite
-}
-
-func TestRunLoggingSuite(t *testing.T) {
-	suite.Run(t, &TestLoggingSuite{test.DBTestSuite{}})
-}
 
 func LogAndAssertJSON(t *testing.T, log func(), assertions func(fields logrus.Fields)) {
 	var buffer bytes.Buffer
@@ -34,11 +25,11 @@ func LogAndAssertJSON(t *testing.T, log func(), assertions func(fields logrus.Fi
 	assertions(fields)
 }
 
-func (s *TestLoggingSuite) TestPointerToString() {
-	s.T().Parallel()
+func TestPointerToString(t *testing.T) {
+	t.Parallel()
 	str := "test"
-	assert.Equal(s.T(), "test", PointerToString(&str))
-	assert.Equal(s.T(), "<nil>", PointerToString(nil))
+	assert.Equal(t, "test", PointerToString(&str))
+	assert.Equal(t, "<nil>", PointerToString(nil))
 }
 
 func TestInfo(t *testing.T) {

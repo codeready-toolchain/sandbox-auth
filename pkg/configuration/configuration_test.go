@@ -22,7 +22,7 @@ func (s *TestConfigurationSuite) TestDefaults() {
 	require.NoError(s.T(), err)
 
 	require.Equal(s.T(), "localhost", cfg.GetPostgresHost())
-	require.Equal(s.T(), int64(5433), cfg.GetPostgresPort())
+	require.Equal(s.T(), int64(5432), cfg.GetPostgresPort())
 	require.Equal(s.T(), "postgres", cfg.GetPostgresUser())
 	require.Equal(s.T(), "postgres", cfg.GetPostgresDatabase())
 	require.Equal(s.T(), "mysecretpassword", cfg.GetPostgresPassword())
@@ -30,7 +30,7 @@ func (s *TestConfigurationSuite) TestDefaults() {
 	require.Equal(s.T(), int64(5), cfg.GetPostgresConnectionTimeout())
 	require.Equal(s.T(), -1, cfg.GetPostgresConnectionMaxIdle())
 	require.Equal(s.T(), -1, cfg.GetPostgresConnectionMaxOpen())
-	require.Equal(s.T(), "host=localhost port=5433 user=postgres password=mysecretpassword dbname=postgres sslmode=disable connect_timeout=5", cfg.GetPostgresConfigString())
+	require.Equal(s.T(), "host=localhost port=5432 user=postgres password=mysecretpassword dbname=postgres sslmode=disable connect_timeout=5", cfg.GetPostgresConfigString())
 }
 
 func (s *TestConfigurationSuite) TestConfiguration() {
