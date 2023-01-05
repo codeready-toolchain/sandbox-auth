@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/codeready-toolchain/sandbox-auth/gen/login"
 	"github.com/codeready-toolchain/sandbox-auth/gormapplication"
+	"github.com/codeready-toolchain/sandbox-auth/migration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/controller"
@@ -88,7 +89,18 @@ func main() {
 	// Set the database transaction timeout
 	transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
 
-	// TODO DB migration here
+	// Migrate the schema
+	err = migration.Migrate(sqlDB, config.GetPostgresDatabase())
+	if err != nil {
+		log.Panic(nil, map[string]interface{}{
+			"err": err,
+		}, "failed migration")
+	}
+
+	// Nothing to here except exit, since the migration is already performed.
+	if migrateDB {
+		os.Exit(0)
+	}
 
 	appDB := gormapplication.NewGormDB(db, config)
 

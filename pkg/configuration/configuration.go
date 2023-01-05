@@ -47,7 +47,7 @@ func NewConfiguration() (*Configuration, error) {
 
 func (c *Configuration) setDefaults() {
 	c.v.SetDefault(varPostgresHost, "localhost")
-	c.v.SetDefault(varPostgresPort, 5433)
+	c.v.SetDefault(varPostgresPort, 5432)
 	c.v.SetDefault(varPostgresUser, "postgres")
 	c.v.SetDefault(varPostgresDatabase, "postgres")
 	c.v.SetDefault(varPostgresPassword, defaultDBPassword)

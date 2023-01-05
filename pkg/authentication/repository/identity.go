@@ -21,6 +21,10 @@ type Identity struct {
 	Username   string
 }
 
+func (m Identity) TableName() string {
+	return TableName
+}
+
 type IdentityRepository interface {
 	Create(ctx context.Context, identity *Identity) error
 	Load(ctx context.Context, id uuid.UUID) (*Identity, error)
