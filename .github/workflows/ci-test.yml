@@ -1,0 +1,29 @@
+name: ci-test
+on:
+  push:
+    branches:
+      - master
+    tags-ignore:
+      - '*.*'
+    pull_request:
+      branches:
+        - master
+
+jobs:
+  golangci:
+    name: Test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set XDG_RUNTIME_DIR
+        run: echo "XDG_RUNTIME_DIR=/run/user/$UID" >> $GITHUB_ENV
+
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.x
+
+      - name: Clone the repository
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        run: make test
