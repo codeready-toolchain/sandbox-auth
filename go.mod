@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/lib/pq v1.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
