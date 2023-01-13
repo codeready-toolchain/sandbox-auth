@@ -53,5 +53,5 @@ func (s *IdentityRepositoryTestSuite) TestRepositoryActions() {
 	// Confirm it was deleted
 	loaded, err = s.Application.IdentityRepository().Load(s.Ctx, reloaded.IdentityID)
 	require.Nil(s.T(), loaded)
-
+	require.Error(s.T(), err)
 }
