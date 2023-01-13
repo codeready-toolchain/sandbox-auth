@@ -42,7 +42,7 @@ func main() {
 
 	config, err := configuration.NewConfiguration()
 	if err != nil {
-		log.Panic(nil, map[string]interface{}{
+		log.Panic(context.TODO(), map[string]interface{}{
 			"err": err,
 		}, "failed to load configuration")
 	}
@@ -92,7 +92,7 @@ func main() {
 	// Migrate the schema
 	err = migration.Migrate(sqlDB, config.GetPostgresDatabase())
 	if err != nil {
-		log.Panic(nil, map[string]interface{}{
+		log.Panic(context.TODO(), map[string]interface{}{
 			"err": err,
 		}, "failed migration")
 	}
@@ -183,44 +183,24 @@ func main() {
 	log.Logger().Println("exited")
 }
 
-type Worker interface {
-	Start(freq time.Duration)
-	Stop()
-}
-
-func configFileFromFlags(flagName string, envVarName string) string {
-	configSwitchIsSet := false
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == flagName {
-			configSwitchIsSet = true
-		}
-	})
-	if !configSwitchIsSet {
-		if envConfigPath, ok := os.LookupEnv(envVarName); ok {
-			return envConfigPath
-		}
-	}
-	return ""
-}
-
 func printUserInfo() {
 	u, err := osUser.Current()
 	if err != nil {
-		log.Warn(nil, map[string]interface{}{
+		log.Warn(context.TODO(), map[string]interface{}{
 			"err": err,
 		}, "failed to get current user")
 	} else {
-		log.Info(nil, map[string]interface{}{
+		log.Info(context.TODO(), map[string]interface{}{
 			"username": u.Username,
 			"uuid":     u.Uid,
 		}, "Running as user name '%s' with UID %s.", u.Username, u.Uid)
 		g, err := osUser.LookupGroupId(u.Gid)
 		if err != nil {
-			log.Warn(nil, map[string]interface{}{
+			log.Warn(context.TODO(), map[string]interface{}{
 				"err": err,
 			}, "failed to lookup group")
 		} else {
-			log.Info(nil, map[string]interface{}{
+			log.Info(context.TODO(), map[string]interface{}{
 				"groupname": g.Name,
 				"gid":       g.Gid,
 			}, "Running as as group '%s' with GID %s.", g.Name, g.Gid)

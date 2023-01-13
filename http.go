@@ -81,7 +81,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL,
 
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
-	srv := &http.Server{Addr: u.Host, Handler: handler}
+	srv := &http.Server{Addr: u.Host, Handler: handler, ReadHeaderTimeout: time.Second * 30}
 	for _, m := range loginServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
@@ -103,7 +103,10 @@ func handleHTTPServer(ctx context.Context, u *url.URL,
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
 
-		srv.Shutdown(ctx)
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			logger.Errorf("error while shutting down")
+		}
 	}()
 }
 
@@ -113,7 +116,10 @@ func handleHTTPServer(ctx context.Context, u *url.URL,
 func errorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter, error) {
 	return func(ctx context.Context, w http.ResponseWriter, err error) {
 		id := ctx.Value(middleware.RequestIDKey).(string)
-		w.Write([]byte("[" + id + "] encoding: " + err.Error()))
+		_, err = w.Write([]byte("[" + id + "] encoding: " + err.Error()))
+		if err != nil {
+			logger.Printf("error writing response: %s", err.Error())
+		}
 		logger.Printf("[%s] ERROR: %s", id, err.Error())
 	}
 }

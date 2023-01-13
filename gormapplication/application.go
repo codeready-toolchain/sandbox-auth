@@ -59,7 +59,7 @@ type GormTransaction struct {
 	GormBase
 }
 
-// GormDB implements the TransactionManager interface methods for initiating a new transaction
+// GormDB implements the Manager interface methods for initiating a new transaction
 type GormDB struct {
 	GormBase
 	txIsoLevel     string
@@ -94,10 +94,6 @@ func (g *GormBase) IdentityRepository() authrepo.IdentityRepository {
 
 func (g *GormBase) DB() *gorm.DB {
 	return g.db
-}
-
-func (g *GormDB) setTransactionIsolationLevel(level string) {
-	g.txIsoLevel = level
 }
 
 // SetTransactionIsolationLevel sets the isolation level for

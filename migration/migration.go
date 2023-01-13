@@ -56,14 +56,14 @@ func Migrate(db *sql.DB, catalog string) error {
 
 		if err != nil {
 			oldErr := err
-			log.Info(nil, map[string]interface{}{
+			log.Info(context.TODO(), map[string]interface{}{
 				"next_version": nextVersion,
 				"migrations":   m,
 				"err":          err,
 			}, "Rolling back transaction due to: %v", err)
 
 			if err = tx.Rollback(); err != nil {
-				log.Error(nil, map[string]interface{}{
+				log.Error(context.TODO(), map[string]interface{}{
 					"next_version": nextVersion,
 					"migrations":   m,
 					"err":          err,
@@ -74,7 +74,7 @@ func Migrate(db *sql.DB, catalog string) error {
 		}
 
 		if err = tx.Commit(); err != nil {
-			log.Error(nil, map[string]interface{}{
+			log.Error(context.TODO(), map[string]interface{}{
 				"migrations": m,
 				"err":        err,
 			}, "error during transaction commit: %v", err)
@@ -84,7 +84,7 @@ func Migrate(db *sql.DB, catalog string) error {
 	}
 
 	if err != nil {
-		log.Error(nil, map[string]interface{}{
+		log.Error(context.TODO(), map[string]interface{}{
 			"migrations": m,
 			"err":        err,
 		}, "migration failed with error: %v", err)
