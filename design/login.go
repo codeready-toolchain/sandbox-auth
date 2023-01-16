@@ -1,7 +1,9 @@
+// !codeanalysis
+
 package design
 
 import (
-	. "goa.design/goa/v3/dsl" //nolint:all
+	. "goa.design/goa/v3/dsl" //nolint
 )
 
 var LoginCriteria = Type("LoginCriteria", func() {
