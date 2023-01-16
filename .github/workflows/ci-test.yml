@@ -39,6 +39,9 @@ jobs:
         
     - name: Clone the repository
       uses: actions/checkout@v3
+      
+    - name: Run the build
+      run: make build
 
     - name: Lint
       uses: golangci/golangci-lint-action@v3
