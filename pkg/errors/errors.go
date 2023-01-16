@@ -15,7 +15,7 @@ const (
 )
 
 type simpleError struct {
-	message stringgit stat
+	message string
 }
 
 func (err simpleError) Error() string {
