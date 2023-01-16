@@ -15,7 +15,7 @@ const (
 )
 
 type simpleError struct {
-	message string
+	message stringgit stat
 }
 
 func (err simpleError) Error() string {
@@ -35,7 +35,7 @@ func NewInternalErrorFromString(errorMessage string) InternalError {
 // IsInternalError returns true if the cause of the given error can be
 // converted to an InternalError, which is returned as the second result.
 func IsInternalError(err error) (bool, error) {
-	var e *InternalError
+	e := &InternalError{}
 	ok := errors.As(err, e)
 	if !ok {
 		return false, nil
@@ -55,7 +55,7 @@ func NewUnauthorizedErrorWithCode(msg string, code int) UnauthorizedError {
 // IsUnauthorizedError returns true if the cause of the given error can be
 // converted to an UnauthorizedError, which is returned as the second result.
 func IsUnauthorizedError(err error) (bool, error) {
-	var e *UnauthorizedError
+	e := &UnauthorizedError{}
 	ok := errors.As(err, e)
 	if !ok {
 		return false, nil
@@ -71,7 +71,7 @@ func NewForbiddenError(msg string) ForbiddenError {
 // IsForbiddenError returns true if the cause of the given error can be
 // converted to an ForbiddenError, which is returned as the second result.
 func IsForbiddenError(err error) (bool, error) {
-	var e *ForbiddenError
+	e := &ForbiddenError{}
 	ok := errors.As(err, e)
 	if !ok {
 		return false, nil
@@ -112,7 +112,7 @@ type DataConflictError struct {
 // IsDataConflictError returns true if the cause of the given error can be
 // converted to an IsDataConflictError, which is returned as the second result.
 func IsDataConflictError(err error) (bool, error) {
-	var e *DataConflictError
+	e := &DataConflictError{}
 	ok := errors.As(err, e)
 	if !ok {
 		return false, nil
@@ -133,7 +133,7 @@ func NewVersionConflictError(msg string) VersionConflictError {
 // IsVersionConflictError returns true if the cause of the given error can be
 // converted to an VersionConflictError, which is returned as the second result.
 func IsVersionConflictError(err error) (bool, error) {
-	var e *VersionConflictError
+	e := &VersionConflictError{}
 	ok := errors.As(err, e)
 	if !ok {
 		return false, nil
@@ -178,7 +178,7 @@ func NewBadParameterErrorFromString(param string, actual interface{}, errorMessa
 // IsBadParameterError returns true if the cause of the given error can be
 // converted to an BadParameterError, which is returned as the second result.
 func IsBadParameterError(err error) (bool, error) {
-	var e *BadParameterError
+	e := &BadParameterError{}
 	ok := errors.As(err, e)
 	if !ok {
 		return false, nil
@@ -227,7 +227,7 @@ func NewNotFoundErrorFromString(errorMessage string) NotFoundError {
 // IsNotFoundError returns true if the cause of the given error can be
 // converted to an NotFoundError, which is returned as the second result.
 func IsNotFoundError(err error) (bool, error) {
-	var e *NotFoundError
+	e := &NotFoundError{}
 	ok := errors.As(err, e)
 	if !ok {
 		return false, nil
