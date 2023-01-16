@@ -1,6 +1,9 @@
 package gormsupport
 
-import "github.com/lib/pq"
+import (
+	"github.com/lib/pq"
+	"github.com/pkg/errors"
+)
 
 const (
 	errCheckViolation      = "23514"
@@ -13,7 +16,8 @@ func IsCheckViolation(err error, constraintName string) bool {
 	if err == nil {
 		return false
 	}
-	pqError, ok := err.(*pq.Error)
+	var pqError *pq.Error
+	ok := errors.As(err, pqError)
 	if !ok {
 		return false
 	}
@@ -25,7 +29,8 @@ func IsUniqueViolation(err error, indexName string) bool {
 	if err == nil {
 		return false
 	}
-	pqError, ok := err.(*pq.Error)
+	var pqError *pq.Error
+	ok := errors.As(err, pqError)
 	if !ok {
 		return false
 	}
@@ -37,7 +42,8 @@ func IsForeignKeyViolation(err error, indexName string) bool {
 	if err == nil {
 		return false
 	}
-	pqError, ok := err.(*pq.Error)
+	var pqError *pq.Error
+	ok := errors.As(err, pqError)
 	if !ok {
 		return false
 	}

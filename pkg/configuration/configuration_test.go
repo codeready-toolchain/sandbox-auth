@@ -18,8 +18,7 @@ func TestRunConfigurationSuite(t *testing.T) {
 }
 
 func (s *TestConfigurationSuite) TestDefaults() {
-	cfg, err := configuration.NewConfiguration()
-	require.NoError(s.T(), err)
+	cfg := configuration.NewConfiguration()
 
 	require.Equal(s.T(), "localhost", cfg.GetPostgresHost())
 	require.Equal(s.T(), int64(5432), cfg.GetPostgresPort())
@@ -59,8 +58,7 @@ func (s *TestConfigurationSuite) TestConfiguration() {
 	require.NoError(s.T(), os.Setenv("AUTH_POSTGRES_CONNECTION_MAXOPEN", "20"))
 
 	// Create the configuration object
-	cfg, err := configuration.NewConfiguration()
-	require.NoError(s.T(), err)
+	cfg := configuration.NewConfiguration()
 
 	// Confirm the configuration parameters are set as expected
 	require.Equal(s.T(), "postgres.host", cfg.GetPostgresHost())

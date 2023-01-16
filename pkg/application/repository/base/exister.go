@@ -16,7 +16,8 @@ type Exister interface {
 }
 
 // exists returns true if a soft or hard deletable item exists in the database table with a given ID
-func exists(ctx context.Context, db *gorm.DB, tableName, idColumnName, id string, softDeletable bool) (bool, error) {
+//nolint:all
+func exists(db *gorm.DB, tableName, idColumnName, id string, softDeletable bool) (bool, error) {
 	var exists bool
 	var query string
 	if softDeletable {
@@ -51,21 +52,27 @@ func exists(ctx context.Context, db *gorm.DB, tableName, idColumnName, id string
 
 // CheckExists does the same as Exists for a soft deletable item but only returns the error value; thereby
 // being a handy convenience function.
-func CheckExists(ctx context.Context, db *gorm.DB, tableName string, id string) error {
-	_, err := exists(ctx, db, tableName, "id", id, true)
+//
+//nolint:unused
+func CheckExists(db *gorm.DB, tableName string, id string) error {
+	_, err := exists(db, tableName, "id", id, true)
 	return err
 }
 
 // CheckExistsWithCustomIDColumn does the same as CheckExists but allows to use custom ID column name
 // instead of the default "id"
-func CheckExistsWithCustomIDColumn(ctx context.Context, db *gorm.DB, tableName, idColumnName, id string) error {
-	_, err := exists(ctx, db, tableName, idColumnName, id, true)
+//
+//nolint:unused
+func CheckExistsWithCustomIDColumn(db *gorm.DB, tableName, idColumnName, id string) error {
+	_, err := exists(db, tableName, idColumnName, id, true)
 	return err
 }
 
 // CheckExists does the same as Exists for a hard deletable item but only returns the error value; thereby
 // being a handy convenience function.
-func CheckHardDeletableExists(ctx context.Context, db *gorm.DB, tableName string, id string) error {
-	_, err := exists(ctx, db, tableName, "id", id, false)
+//
+//nolint:unused
+func CheckHardDeletableExists(db *gorm.DB, tableName string, id string) error {
+	_, err := exists(db, tableName, "id", id, false)
 	return err
 }

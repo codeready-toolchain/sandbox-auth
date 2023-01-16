@@ -150,6 +150,7 @@ func NewServiceFactory(producer svcContext.ServiceContextProducer, config *confi
 	return f
 }
 
+//nolint:unused
 func (f *ServiceFactory) getContext() svcContext.ServiceContext {
 	return f.contextProducer()
 }

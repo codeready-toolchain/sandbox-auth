@@ -1,7 +1,7 @@
 package service
 
 const (
-	FACTORY_TYPE_IDENTITY_PROVIDER = "factory.type.identity.provider"
+	FactoryTypeIdentityProvider = "factory.type.identity.provider"
 )
 
 /*

@@ -65,7 +65,7 @@ func (r *GormIdentityRepository) Create(ctx context.Context, model *Identity) er
 func (r *GormIdentityRepository) Load(ctx context.Context, identityID uuid.UUID) (*Identity, error) {
 	var native Identity
 	err := r.db.WithContext(ctx).Table(TableName).Where("identity_id = ?", identityID).First(&native).Error
-	if err == gorm.ErrRecordNotFound {
+	if errs.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errs.WithStack(errors.NewNotFoundError("identity", identityID.String()))
 	}
 

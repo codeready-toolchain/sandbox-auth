@@ -5,6 +5,8 @@ import (
 )
 
 // BaseService provides transaction control and other common features for service implementations
+//
+//nolint:all
 type BaseService struct {
 	ctxpkg.ServiceContext
 }

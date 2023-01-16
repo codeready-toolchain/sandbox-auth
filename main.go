@@ -40,12 +40,7 @@ func main() {
 	)
 	flag.Parse()
 
-	config, err := configuration.NewConfiguration()
-	if err != nil {
-		log.Panic(context.TODO(), map[string]interface{}{
-			"err": err,
-		}, "failed to load configuration")
-	}
+	config := configuration.NewConfiguration()
 
 	if *printConfig {
 		os.Exit(0)
@@ -90,7 +85,7 @@ func main() {
 	transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
 
 	// Migrate the schema
-	err = migration.Migrate(sqlDB, config.GetPostgresDatabase())
+	err := migration.Migrate(sqlDB, config.GetPostgresDatabase())
 	if err != nil {
 		log.Panic(context.TODO(), map[string]interface{}{
 			"err": err,

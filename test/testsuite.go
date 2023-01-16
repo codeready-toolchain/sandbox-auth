@@ -38,13 +38,7 @@ type DBTestSuite struct {
 func (s *DBTestSuite) SetupSuite() {
 	ctx := context.Background()
 
-	config, err := configuration.NewConfiguration()
-	if err != nil {
-		log.Panic(nil, map[string]interface{}{
-			"err": err,
-		}, "failed to create configuration for test")
-		s.T().Fatal(err)
-	}
+	config := configuration.NewConfiguration()
 
 	pg, err := setupPostgres(ctx, config)
 	if err != nil {
@@ -95,7 +89,7 @@ func (s *DBTestSuite) SetupSuite() {
 	// Run the migration
 	err = migration.Migrate(db, config.GetPostgresDatabase())
 	if err != nil {
-		log.Panic(nil, map[string]interface{}{
+		log.Panic(context.TODO(), map[string]interface{}{
 			"err": err,
 		}, "failed migration")
 	}

@@ -6,7 +6,6 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"sync"
 	"text/template"
 
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
@@ -21,16 +20,13 @@ var sqlFiles embed.FS
 const AdvisoryLockID = 42
 
 // fn defines the type of function that can be part of a migration steps
-type fn func(tx *sql.Tx) error
+type VersionFunction func(tx *sql.Tx) error
 
 // steps defines a collection of all the functions that make up a version
-type steps []fn
+type steps []VersionFunction
 
 // Migrations defines all a collection of all the steps
 type Migrations []steps
-
-// mutex variable to lock/unlock the population of common types
-var populateLocker = &sync.Mutex{}
 
 // Migrate executes the required migration of the database on startup.
 // For each successful migration, an entry will be written into the "version"
@@ -139,7 +135,7 @@ func GetMigrations() Migrations {
 // ExecuteSQLFile loads the given filename from the packaged SQL files and
 // executes it on the given database. Golang text/template module is used
 // to handle all the optional arguments passed to the sql files
-func ExecuteSQLFile(filename string, args ...string) fn {
+func ExecuteSQLFile(filename string, args ...string) VersionFunction {
 	return func(db *sql.Tx) error {
 		data, err := sqlFiles.ReadFile("sql-files/" + filename)
 		if err != nil {
@@ -201,14 +197,14 @@ func MigrateToNextVersion(tx *sql.Tx, nextVersion *int64, m Migrations, catalog 
 	*nextVersion = currentVersion + 1
 	if *nextVersion >= int64(len(m)) {
 		// No further updates to apply (this is NOT an error)
-		log.Info(nil, map[string]interface{}{
+		log.Info(context.TODO(), map[string]interface{}{
 			"next_version":    *nextVersion,
 			"current_version": currentVersion,
 		}, "Current version %d. Nothing to update.", currentVersion)
 		return nil
 	}
 
-	log.Info(nil, map[string]interface{}{
+	log.Info(context.TODO(), map[string]interface{}{
 		"next_version":    *nextVersion,
 		"current_version": currentVersion,
 	}, "Attempt to update DB to version %v", *nextVersion)
@@ -224,7 +220,7 @@ func MigrateToNextVersion(tx *sql.Tx, nextVersion *int64, m Migrations, catalog 
 		return errs.Errorf("Failed to update DB to version %d: %s\n", *nextVersion, err)
 	}
 
-	log.Info(nil, map[string]interface{}{
+	log.Info(context.TODO(), map[string]interface{}{
 		"next_version":    *nextVersion,
 		"current_version": currentVersion,
 	}, "Successfully updated DB to version %v", *nextVersion)
