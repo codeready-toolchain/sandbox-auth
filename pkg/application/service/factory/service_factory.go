@@ -1,13 +1,14 @@
 package factory
 
 import (
+	"context"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"time"
 
 	factory "github.com/codeready-toolchain/sandbox-auth/pkg/application/factory/manager"
 	repopkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/repository"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service"
-	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
+	svcContext "github.com/codeready-toolchain/sandbox-auth/pkg/application/service/context"
 	transpkg "github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
 
 	"github.com/codeready-toolchain/sandbox-auth/pkg/log"
@@ -18,23 +19,22 @@ import (
 type serviceContextImpl struct {
 	repositories              repopkg.Repositories
 	transactionalRepositories repopkg.Repositories
-	transactionManager        transpkg.TransactionManager
+	transactionManager        transpkg.Manager
 	inTransaction             bool
 	services                  service.Services
 	factories                 service.Factories
 }
 
-func NewServiceContext(repos repopkg.Repositories, tm transpkg.TransactionManager, config *configuration.Configuration,
-	options ...Option) context.ServiceContext {
+func NewServiceContext(repos repopkg.Repositories, tm transpkg.Manager, config *configuration.Configuration,
+	options ...Option) svcContext.ServiceContext {
 	ctx := &serviceContextImpl{}
 	ctx.repositories = repos
 	ctx.transactionManager = tm
 	ctx.inTransaction = false
 
-	var sc context.ServiceContext
-	sc = ctx
-	ctx.factories = factory.NewManager(func() context.ServiceContext { return sc }, config)
-	ctx.services = NewServiceFactory(func() context.ServiceContext { return sc }, config, options...)
+	sc := ctx
+	ctx.factories = factory.NewManager(func() svcContext.ServiceContext { return sc }, config)
+	ctx.services = NewServiceFactory(func() svcContext.ServiceContext { return sc }, config, options...)
 	return sc
 }
 
@@ -59,7 +59,7 @@ func (s *serviceContextImpl) ExecuteInTransaction(todo func() error) error {
 		var tx transpkg.Transaction
 		var err error
 		if tx, err = s.transactionManager.BeginTransaction(); err != nil {
-			log.Error(nil, map[string]interface{}{
+			log.Error(context.TODO(), map[string]interface{}{
 				"err": err,
 			}, "database BeginTransaction failed!")
 
@@ -90,28 +90,41 @@ func (s *serviceContextImpl) ExecuteInTransaction(todo func() error) error {
 			select {
 			case err := <-errorChan:
 				if err != nil {
-					log.Debug(nil, nil, "Rolling back the transaction...")
-					tx.Rollback()
-					log.Error(nil, map[string]interface{}{
+					log.Debug(context.TODO(), nil, "Rolling back the transaction...")
+					err = tx.Rollback()
+					if err != nil {
+						log.Error(context.TODO(), map[string]interface{}{
+							"err": err,
+						}, "error rolling back transaction")
+					}
+					log.Error(context.TODO(), map[string]interface{}{
 						"err": err,
 					}, "database transaction failed!")
 					return errors.WithStack(err)
 				}
 
-				tx.Commit()
-				log.Debug(nil, nil, "Commit the transaction!")
+				err = tx.Commit()
+				if err != nil {
+					log.Error(context.TODO(), map[string]interface{}{
+						"err": err,
+					}, "database commit failed")
+				}
+				log.Debug(context.TODO(), nil, "Commit the transaction!")
 				return nil
 			case <-txTimeout:
-				log.Debug(nil, nil, "Rolling back the transaction...")
-				tx.Rollback()
-				log.Error(nil, nil, "database transaction timeout!")
+				log.Debug(context.TODO(), nil, "Rolling back the transaction...")
+				err = tx.Rollback()
+				if err != nil {
+					log.Error(context.TODO(), nil, "database rollback failed")
+				}
+				log.Error(context.TODO(), nil, "database transaction timeout!")
 				return errors.New("database transaction timeout")
 			}
 		}()
-	} else {
-		// If we are in a transaction, simply execute the passed function
-		return todo()
 	}
+
+	// If we are in a transaction, simply execute the passed function
+	return todo()
 }
 
 func (s *serviceContextImpl) endTransaction() {
@@ -119,17 +132,17 @@ func (s *serviceContextImpl) endTransaction() {
 }
 
 type ServiceFactory struct {
-	contextProducer context.ServiceContextProducer
+	contextProducer svcContext.ServiceContextProducer
 	config          *configuration.Configuration
 }
 
 // Option an option to configure the Service Factory
 type Option func(f *ServiceFactory)
 
-func NewServiceFactory(producer context.ServiceContextProducer, config *configuration.Configuration, options ...Option) *ServiceFactory {
+func NewServiceFactory(producer svcContext.ServiceContextProducer, config *configuration.Configuration, options ...Option) *ServiceFactory {
 	f := &ServiceFactory{contextProducer: producer, config: config}
 
-	log.Debug(nil, map[string]interface{}{}, "configuring a new service factory with %d options", len(options))
+	log.Debug(context.TODO(), map[string]interface{}{}, "configuring a new service factory with %d options", len(options))
 	// and options
 	for _, opt := range options {
 		opt(f)
@@ -137,6 +150,7 @@ func NewServiceFactory(producer context.ServiceContextProducer, config *configur
 	return f
 }
 
-func (f *ServiceFactory) getContext() context.ServiceContext {
+//nolint:unused
+func (f *ServiceFactory) getContext() svcContext.ServiceContext {
 	return f.contextProducer()
 }

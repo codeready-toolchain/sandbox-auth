@@ -9,5 +9,5 @@ import (
 type Application interface {
 	repository.Repositories
 	service.Services
-	transaction.TransactionManager
+	transaction.Manager
 }

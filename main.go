@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/codeready-toolchain/sandbox-auth/gen/login"
 	"github.com/codeready-toolchain/sandbox-auth/gormapplication"
+	"github.com/codeready-toolchain/sandbox-auth/migration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/transaction"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/controller"
@@ -39,12 +40,7 @@ func main() {
 	)
 	flag.Parse()
 
-	config, err := configuration.NewConfiguration()
-	if err != nil {
-		log.Panic(nil, map[string]interface{}{
-			"err": err,
-		}, "failed to load configuration")
-	}
+	config := configuration.NewConfiguration()
 
 	if *printConfig {
 		os.Exit(0)
@@ -88,7 +84,18 @@ func main() {
 	// Set the database transaction timeout
 	transaction.SetDatabaseTransactionTimeout(config.GetPostgresTransactionTimeout())
 
-	// TODO DB migration here
+	// Migrate the schema
+	err := migration.Migrate(sqlDB, config.GetPostgresDatabase())
+	if err != nil {
+		log.Panic(context.TODO(), map[string]interface{}{
+			"err": err,
+		}, "failed migration")
+	}
+
+	// Nothing to here except exit, since the migration is already performed.
+	if migrateDB {
+		os.Exit(0)
+	}
 
 	appDB := gormapplication.NewGormDB(db, config)
 
@@ -171,44 +178,24 @@ func main() {
 	log.Logger().Println("exited")
 }
 
-type Worker interface {
-	Start(freq time.Duration)
-	Stop()
-}
-
-func configFileFromFlags(flagName string, envVarName string) string {
-	configSwitchIsSet := false
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == flagName {
-			configSwitchIsSet = true
-		}
-	})
-	if !configSwitchIsSet {
-		if envConfigPath, ok := os.LookupEnv(envVarName); ok {
-			return envConfigPath
-		}
-	}
-	return ""
-}
-
 func printUserInfo() {
 	u, err := osUser.Current()
 	if err != nil {
-		log.Warn(nil, map[string]interface{}{
+		log.Warn(context.TODO(), map[string]interface{}{
 			"err": err,
 		}, "failed to get current user")
 	} else {
-		log.Info(nil, map[string]interface{}{
+		log.Info(context.TODO(), map[string]interface{}{
 			"username": u.Username,
 			"uuid":     u.Uid,
 		}, "Running as user name '%s' with UID %s.", u.Username, u.Uid)
 		g, err := osUser.LookupGroupId(u.Gid)
 		if err != nil {
-			log.Warn(nil, map[string]interface{}{
+			log.Warn(context.TODO(), map[string]interface{}{
 				"err": err,
 			}, "failed to lookup group")
 		} else {
-			log.Info(nil, map[string]interface{}{
+			log.Info(context.TODO(), map[string]interface{}{
 				"groupname": g.Name,
 				"gid":       g.Gid,
 			}, "Running as as group '%s' with GID %s.", g.Name, g.Gid)

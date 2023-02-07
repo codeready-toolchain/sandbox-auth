@@ -8,7 +8,6 @@ import (
 )
 
 const (
-	varHTTPAddress = "http.address"
 
 	// POSTGRES
 
@@ -31,7 +30,7 @@ type Configuration struct {
 	v *viper.Viper
 }
 
-func NewConfiguration() (*Configuration, error) {
+func NewConfiguration() *Configuration {
 	c := &Configuration{
 		v: viper.New(),
 	}
@@ -42,12 +41,12 @@ func NewConfiguration() (*Configuration, error) {
 	c.v.SetTypeByDefaultValue(true)
 	c.setDefaults()
 
-	return c, nil
+	return c
 }
 
 func (c *Configuration) setDefaults() {
 	c.v.SetDefault(varPostgresHost, "localhost")
-	c.v.SetDefault(varPostgresPort, 5433)
+	c.v.SetDefault(varPostgresPort, 5432)
 	c.v.SetDefault(varPostgresUser, "postgres")
 	c.v.SetDefault(varPostgresDatabase, "postgres")
 	c.v.SetDefault(varPostgresPassword, defaultDBPassword)

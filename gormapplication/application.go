@@ -3,6 +3,7 @@ package gormapplication
 import (
 	"fmt"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/application/service/factory"
+	authrepo "github.com/codeready-toolchain/sandbox-auth/pkg/authentication/repository"
 	"github.com/codeready-toolchain/sandbox-auth/pkg/configuration"
 	"strconv"
 
@@ -58,7 +59,7 @@ type GormTransaction struct {
 	GormBase
 }
 
-// GormDB implements the TransactionManager interface methods for initiating a new transaction
+// GormDB implements the Manager interface methods for initiating a new transaction
 type GormDB struct {
 	GormBase
 	txIsoLevel     string
@@ -75,6 +76,10 @@ func (g *GormBase) newSession() *gorm.DB {
 //
 //----------------------------------------------------------------------------------------------------------------------
 
+func (g *GormBase) IdentityRepository() authrepo.IdentityRepository {
+	return authrepo.NewIdentityRepository(g.newSession())
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 //
 // Services
@@ -89,10 +94,6 @@ func (g *GormBase) newSession() *gorm.DB {
 
 func (g *GormBase) DB() *gorm.DB {
 	return g.db
-}
-
-func (g *GormDB) setTransactionIsolationLevel(level string) {
-	g.txIsoLevel = level
 }
 
 // SetTransactionIsolationLevel sets the isolation level for

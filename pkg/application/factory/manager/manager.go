@@ -14,6 +14,7 @@ func NewManager(producer ctxpkg.ServiceContextProducer, config *configuration.Co
 	return &Manager{contextProducer: producer, config: config}
 }
 
+//nolint:unused
 func (f *Manager) getContext() ctxpkg.ServiceContext {
 	return f.contextProducer()
 }

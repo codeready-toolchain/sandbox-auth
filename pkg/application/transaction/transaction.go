@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"fmt"
 	"github.com/pkg/errors"
 	"time"
@@ -31,18 +32,18 @@ type Transaction interface {
 	Rollback() error
 }
 
-// TransactionManager manages the lifecycle of a database transaction. The transactional resources (such as repositories)
+// Manager manages the lifecycle of a database transaction. The transactional resources (such as repositories)
 // created for the transaction object make changes inside the transaction
-type TransactionManager interface {
+type Manager interface {
 	BeginTransaction() (Transaction, error)
 }
 
 // Transactional executes the given function in a transaction. If todo returns an error, the transaction is rolled back
-func Transactional(tm TransactionManager, todo func(f TransactionalResources) error) error {
+func Transactional(tm Manager, todo func(f TransactionalResources) error) error {
 	var tx Transaction
 	var err error
 	if tx, err = tm.BeginTransaction(); err != nil {
-		log.Error(nil, map[string]interface{}{
+		log.Error(context.TODO(), map[string]interface{}{
 			"err": err,
 		}, "database BeginTransaction failed!")
 
@@ -53,10 +54,10 @@ func Transactional(tm TransactionManager, todo func(f TransactionalResources) er
 		errorChan := make(chan error, 1)
 		txTimeout := time.After(databaseTransactionTimeout)
 
-		go func(f TransactionalResources) {
+		go func(_ TransactionalResources) {
 			defer func() {
 				if err := recover(); err != nil {
-					errorChan <- errors.New(fmt.Sprintf("Unknown error: %v", err))
+					errorChan <- fmt.Errorf("Unknown error: %v", err)
 				}
 			}()
 			errorChan <- todo(tx)
@@ -65,22 +66,36 @@ func Transactional(tm TransactionManager, todo func(f TransactionalResources) er
 		select {
 		case err := <-errorChan:
 			if err != nil {
-				log.Debug(nil, nil, "Rolling back the transaction...")
-				tx.Rollback()
-				log.Error(nil, map[string]interface{}{
+				log.Debug(context.TODO(), nil, "Rolling back the transaction...")
+				rbErr := tx.Rollback()
+				if rbErr != nil {
+					log.Error(context.TODO(), map[string]interface{}{
+						"err": err,
+					}, "failed to rollback transaction")
+				}
+				log.Error(context.TODO(), map[string]interface{}{
 					"err": err,
 				}, "database transaction failed!")
 				return errors.WithStack(err)
 			}
 
-			tx.Commit()
-			log.Debug(nil, nil, "Commit the transaction!")
+			err = tx.Commit()
+			if err != nil {
+				log.Error(context.TODO(), map[string]interface{}{
+					"err": err,
+				}, "failed to commit transaction")
+				return err
+			}
+			log.Debug(context.TODO(), nil, "Commit the transaction!")
 			return nil
 		case <-txTimeout:
-			log.Debug(nil, nil, "Rolling back the transaction...")
-			tx.Rollback()
-			log.Error(nil, nil, "database transaction timeout!")
-			return errors.New("database transaction timeout!")
+			log.Debug(context.TODO(), nil, "Rolling back the transaction...")
+			err = tx.Rollback()
+			if err != nil {
+				log.Error(context.TODO(), nil, "error rolling back transaction")
+			}
+			log.Error(context.TODO(), nil, "database transaction timeout!")
+			return errors.New("database transaction timeout")
 		}
 	}()
 }
